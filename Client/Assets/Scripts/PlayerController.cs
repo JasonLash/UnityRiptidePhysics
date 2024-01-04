@@ -34,8 +34,8 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody rb;
 
-    public float player_movement_impulse;
-    public float player_jump_y_threshold;
+    public float playerMovementImpulse;
+    public float playerJumpYThreshold;
 
     public Player playerScript;
 
@@ -143,23 +143,23 @@ public class PlayerController : MonoBehaviour
  
         if (inputs[0])
         {
-            rigidbody.AddForce(Vector3.forward * player_movement_impulse, ForceMode.Impulse);
+            rigidbody.AddForce(Vector3.forward * playerMovementImpulse, ForceMode.Impulse);
         }
         if (inputs[1])
         {
-            rigidbody.AddForce(-Vector3.forward * player_movement_impulse, ForceMode.Impulse);
+            rigidbody.AddForce(-Vector3.forward * playerMovementImpulse, ForceMode.Impulse);
         }
         if (inputs[2])
         {
-            rigidbody.AddForce(-Vector3.right * player_movement_impulse, ForceMode.Impulse);
+            rigidbody.AddForce(-Vector3.right * playerMovementImpulse, ForceMode.Impulse);
         }
         if (inputs[3])
         {
-            rigidbody.AddForce(Vector3.right * player_movement_impulse, ForceMode.Impulse);
+            rigidbody.AddForce(Vector3.right * playerMovementImpulse, ForceMode.Impulse);
         }
-        if (rigidbody.transform.position.y <= player_jump_y_threshold && inputs[4])
+        if (rigidbody.transform.position.y <= playerMovementImpulse && inputs[4])
         {
-            rigidbody.AddForce(Vector3.up * player_movement_impulse, ForceMode.Impulse);
+            rigidbody.AddForce(Vector3.up * playerMovementImpulse, ForceMode.Impulse);
         }
             
     }
