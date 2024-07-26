@@ -6,19 +6,25 @@
 
 # Purpose
 
-Implement the client side prediction logic from: https://www.codersblock.org/blog/client-side-prediction-in-unity-2018 using the [Riptide networking library](https://github.com/RiptideNetworking/Riptide). 
+Implement the client side prediction logic from: https://www.codersblock.org/blog/client-side-prediction-in-unity-2018 using the [Riptide networking library](https://github.com/RiptideNetworking/Riptide).
+
+# Installation and Getting Started
+
+Unity version: 2022.3.39f1 (LTS)
+
+Clone or download this repository. Inside you will find two main folders, Client and Server. Use Unity Hub to add these two projects, they need to be opened separately. Once added and opened, head over to the scenes folder in both projects and open the scene named “Main”. You should now be able to start the server and start the client. On the client project you will be presented with a “username” text field and a “connect” button. Hitting connect or pressing enter will connect you to the local server (a username is not required). You can now use WASD and space to move the cube.
 
 # Theory
 
 ### Authoritative Server
 
-There are a few different reasons one might choose an authoritative server architecture. The most popular reason is to prevent client side cheating. The issue you’ll quickly find with authoritative servers is input delay. You must wait a round trip from client to server for your input to be processed. The client acts a dumb terminal processing inputs while the server runs the actual game. 
+There are a few different reasons one might choose an authoritative server architecture. The most popular reason is to prevent client side cheating. The issue you’ll quickly find with authoritative servers is input delay. You must wait a round trip from client to server for your input to be processed. The client acts a dumb terminal processing inputs while the server runs the actual game.
 
 <p align="center">
   <img src="extras/serverAuth.png" />
 </p>
 
-### Client Side Prediction 
+### Client Side Prediction
 
 The solution is having the client move right away and store the location in a buffer. When the client receives a server position it compares it to the buffer. If the position is too far off, move the client to the server position.
 
@@ -29,11 +35,13 @@ The solution is having the client move right away and store the location in a bu
 # Server and Client
 
 Disable physics. We will be progressing physics at our own rate.
+
 ```cs
 Physics.simulationMode = SimulationMode.Script;
 ```
 
 The physics timestep per tick. It is important for the server and client to be on the same time scale. aka set the same “Fixed Timestep” value under Edit->Project Settings...->Time
+
 ```cs
 deltaTickTime = Time.fixedDeltaTime;
 ```
@@ -60,11 +68,11 @@ private void PhysicsStep(Rigidbody rigidbody, bool[] inputs)
     if (rigidbody.transform.position.y <= player_jump_y_threshold && inputs[4])
     {
         rigidbody.AddForce(Vector3.up * player_movement_impulse, ForceMode.Impulse);
-    } 
+    }
 }
 ```
 
-Simple rigidbody movement. Both the server and client share the same code and values. 
+Simple rigidbody movement. Both the server and client share the same code and values.
 
 ### Buffers
 
@@ -75,6 +83,7 @@ public class ClientInput
     public ushort currentTick = 0;
 }
 ```
+
 ```cs
 public class SimulationState
 {
@@ -83,6 +92,7 @@ public class SimulationState
     public ushort currentTick = 0;
 }
 ```
+
 ```cs
 public class ServerSimulationState
 {
@@ -108,7 +118,7 @@ clientStateCache = new SimulationState[CacheSize];
 
 ### Player.cs
 
-Disable all other players while processing input. Save all the players velocities in order to keep to velocity when re-enabling rigidbody. 
+Disable all other players while processing input. Save all the players velocities in order to keep to velocity when re-enabling rigidbody.
 
 ```cs
 foreach (KeyValuePair<ushort, Player> entry in List)
@@ -120,7 +130,7 @@ foreach (KeyValuePair<ushort, Player> entry in List)
         player.playerVelocity = player.rb.velocity;
         player.playerAngularVelocity = player.rb.angularVelocity;
         player.rb.isKinematic = true;
-    }	
+    }
     else
         player.rb.isKinematic = false;
 }
