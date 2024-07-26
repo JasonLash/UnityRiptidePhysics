@@ -43,6 +43,8 @@ public class NetworkManager : MonoBehaviour
 
     public Client Client { get; private set; }
 
+    public float TickRate;
+
     private void Awake()
     {
         Singleton = this;
@@ -57,6 +59,8 @@ public class NetworkManager : MonoBehaviour
         Client.ConnectionFailed += FailedToConnect;
         Client.ClientDisconnected += PlayerLeft;
         Client.Disconnected += DidDisconnect;
+
+        TickRate = Time.fixedDeltaTime;
     }
 
     private void FixedUpdate()

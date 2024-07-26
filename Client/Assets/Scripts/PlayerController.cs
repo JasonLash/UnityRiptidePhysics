@@ -25,7 +25,6 @@ public class ServerSimulationState
 
 public class PlayerController : MonoBehaviour
 {
-    private float deltaTickTime;
     public ushort cTick;
     public const int CacheSize = 1024;
 
@@ -34,8 +33,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody rb;
 
-    public float playerMovementImpulse;
-    public float playerJumpYThreshold;
+    public float playerMovementImpulse = 0.5f;
 
     public Player playerScript;
 
@@ -53,8 +51,6 @@ public class PlayerController : MonoBehaviour
     {
         Physics.simulationMode = SimulationMode.Script;
 
-        deltaTickTime = Time.fixedDeltaTime;
-
         rb = GetComponent<Rigidbody>();
             
         rb.isKinematic = false;
@@ -69,15 +65,22 @@ public class PlayerController : MonoBehaviour
         cTick = 0;
     }
 
+    void Update()
+    {
+        int cacheIndex = cTick % CacheSize;
+        inputCache[cacheIndex] = GetInput();
+    }
+
 	private void FixedUpdate()
 	{
         int cacheIndex = cTick % CacheSize;
 
         inputCache[cacheIndex] = GetInput();
+
         clientStateCache[cacheIndex] = CurrentSimulationState(rb);
 
         PhysicsStep(rb, inputCache[cacheIndex].Inputs);
-        Physics.Simulate(deltaTickTime);
+        Physics.Simulate(NetworkManager.Singleton.TickRate);
         SendInput();
 
         ++cTick;
@@ -95,9 +98,9 @@ public class PlayerController : MonoBehaviour
         SimulationState cachedSimulationState = clientStateCache[cacheIndex];
 
         Vector3 positionError = serverSimulationState.position - cachedSimulationState.position;
-        float rotationError = 1.0f - Quaternion.Dot(serverSimulationState.rotation, cachedSimulationState.rotation);
+        //float rotationError = 1.0f - Quaternion.Dot(serverSimulationState.rotation, cachedSimulationState.rotation);
 
-        if (positionError.sqrMagnitude > 0.0000001f || rotationError > 0.00001f)
+        if (positionError.sqrMagnitude > 0.0000001f)
         {
             Debug.Log("Correcting for error at tick " + serverSimulationState.currentTick + " (rewinding " + (cTick - cachedSimulationState.currentTick) + " ticks)");
             // capture the current predicted pos for smoothing
@@ -118,7 +121,7 @@ public class PlayerController : MonoBehaviour
                 clientStateCache[cacheIndex] = CurrentSimulationState(rb);
 
                 PhysicsStep(rb, inputCache[cacheIndex].Inputs);
-                Physics.Simulate(deltaTickTime);
+                Physics.Simulate(NetworkManager.Singleton.TickRate);
 
                 ++rewindTickNumber;
             }
@@ -140,7 +143,6 @@ public class PlayerController : MonoBehaviour
 
     private void PhysicsStep(Rigidbody rigidbody, bool[] inputs)
     {
- 
         if (inputs[0])
         {
             rigidbody.AddForce(Vector3.forward * playerMovementImpulse, ForceMode.Impulse);
@@ -157,11 +159,10 @@ public class PlayerController : MonoBehaviour
         {
             rigidbody.AddForce(Vector3.right * playerMovementImpulse, ForceMode.Impulse);
         }
-        if (rigidbody.transform.position.y <= playerMovementImpulse && inputs[4])
+        if (inputs[4])
         {
             rigidbody.AddForce(Vector3.up * playerMovementImpulse, ForceMode.Impulse);
-        }
-            
+        } 
     }
 
     private SimulationState CurrentSimulationState(Rigidbody rb)

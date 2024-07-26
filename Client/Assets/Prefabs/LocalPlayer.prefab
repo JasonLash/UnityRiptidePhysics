@@ -100,8 +100,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cTick: 0
-  player_movement_impulse: 0.5
-  player_jump_y_threshold: -3
+  playerMovementImpulse: 0.5
   playerScript: {fileID: 0}
 --- !u!114 &2132342804188314751
 MonoBehaviour:

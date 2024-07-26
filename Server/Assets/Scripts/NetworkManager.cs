@@ -43,6 +43,8 @@ public class NetworkManager : MonoBehaviour
 
     public Server Server { get; private set; }
 
+    public float TickRate;
+
     private void Awake()
     {
         Singleton = this;
@@ -67,6 +69,8 @@ public class NetworkManager : MonoBehaviour
         Server.ClientDisconnected += PlayerLeft;
 
         Server.Start(port, maxClientCount);
+
+        TickRate = Time.fixedDeltaTime;
     }
 
     private void FixedUpdate()

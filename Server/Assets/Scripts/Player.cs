@@ -17,12 +17,9 @@ public class Player : MonoBehaviour
 
     [SerializeField] public Rigidbody rb;
 
-    private float deltaTickTime;
-
     private ClientInput lastReceivedInputs = new ClientInput();
 
-    public float player_movement_impulse;
-    public float player_jump_y_threshold;
+    public float playerMovementImpulse = 0.5f;
 
     public Vector3 playerVelocity;
     public Vector3 playerAngularVelocity;
@@ -34,8 +31,6 @@ public class Player : MonoBehaviour
 
         rb = GetComponent<Rigidbody>();
         rb.isKinematic = false;
-            
-        deltaTickTime = Time.fixedDeltaTime;
     }
 
     private void HandleClientInput(ClientInput[] inputs, ushort clientID)
@@ -66,7 +61,7 @@ public class Player : MonoBehaviour
             for (int i = start; i < inputs.Length - 1; i++)
             {
                 PhysicsStep(rb, inputs[i].Inputs);
-                Physics.Simulate(deltaTickTime);
+                Physics.Simulate(NetworkManager.Singleton.TickRate);
                 SendMovement((ushort)(inputs[i].currentTick + 1));
             }
 
@@ -91,23 +86,23 @@ public class Player : MonoBehaviour
     {
         if (inputs[0])
         {
-            rigidbody.AddForce(Vector3.forward * player_movement_impulse, ForceMode.Impulse);
+            rigidbody.AddForce(Vector3.forward * playerMovementImpulse, ForceMode.Impulse);
         }
         if (inputs[1])
         {
-            rigidbody.AddForce(-Vector3.forward * player_movement_impulse, ForceMode.Impulse);
+            rigidbody.AddForce(-Vector3.forward * playerMovementImpulse, ForceMode.Impulse);
         }
         if (inputs[2])
         {
-            rigidbody.AddForce(-Vector3.right * player_movement_impulse, ForceMode.Impulse);
+            rigidbody.AddForce(-Vector3.right * playerMovementImpulse, ForceMode.Impulse);
         }
         if (inputs[3])
         {
-            rigidbody.AddForce(Vector3.right * player_movement_impulse, ForceMode.Impulse);
+            rigidbody.AddForce(Vector3.right * playerMovementImpulse, ForceMode.Impulse);
         }
-        if (rigidbody.transform.position.y <= player_jump_y_threshold && inputs[4])
+        if (inputs[4])
         {
-            rigidbody.AddForce(Vector3.up * player_movement_impulse, ForceMode.Impulse);
+            rigidbody.AddForce(Vector3.up * playerMovementImpulse, ForceMode.Impulse);
         } 
     }
 
